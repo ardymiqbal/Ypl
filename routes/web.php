@@ -25,8 +25,8 @@ Route::get('/artikel', [ArticleController::class, 'publicIndex'])
 Route::get('/artikel/{slug}', [HomeController::class, 'showArticle'])
   ->name('articles.show');
 
-Route::get('/galeri', [GalleryController::class, 'public'])
-  ->name('galleries.public');
+Route::get('/media/gallery/{gallery}', [GalleryController::class, 'media'])
+    ->name('galleries.media');
 
 /*
 |--------------------------------------------------------------------------
