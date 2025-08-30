@@ -12,7 +12,7 @@ class FocusController extends Controller
     public function sampah()
     {
         // === Poster (portrait) ===
-        $posterDir = public_path('images/fokus-kerja/sampah/poster');
+        $posterDir = asset('images/fokus-kerja/sampah/poster');
         $posters = collect(is_dir($posterDir) ? File::files($posterDir) : [])
             ->filter(fn($f) => in_array(strtolower($f->getExtension()), ['jpg','jpeg','png','webp']))
             ->sortBy(fn($f) => $f->getFilename())
@@ -29,9 +29,7 @@ class FocusController extends Controller
             ->get(['id','title','media_type','media_path']);
 
         // === Hero ===
-        $hero = file_exists(public_path('images/fokus-kerja/sampah/hero.jpeg'))
-            ? asset('images/fokus-kerja/sampah/hero.jpeg')
-            : ($gallery[0] ?? asset('images/placeholder-hero.jpg'));
+        $hero = asset('images/fokus-kerja/sampah/hero.jpeg');  
 
         // Artikel terbaru
         $latestArticles = Article::where('status','published')->latest()->take(3)->get();
@@ -43,7 +41,7 @@ class FocusController extends Controller
     // --- Halaman stub opsional ---
     public function edukasi(Request $request)
     {
-        $hero = asset('images/fokus-kerja/edukasi/hero.jpg');          
+        $hero = asset('images/fokus-kerja/sampah/hero.jpeg');          
         $imgA   = asset('images/fokus-kerja/edukasi/kegiatan-2.jpeg');  
         $imgB   = asset('images/fokus-kerja/edukasi/kegiatan-3.JPG');
 
