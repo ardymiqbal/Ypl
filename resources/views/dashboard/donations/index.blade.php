@@ -40,7 +40,7 @@
       $fileUrl = $d->proof_path
         ? (Str::startsWith($d->proof_path, ['http://','https://'])
             ? $d->proof_path
-            : asset('storage/'.$d->proof_path))
+            : asset('donations.file'.$d->proof_path))
         : null;
 
       $badge = [
@@ -137,12 +137,12 @@
               'rejected' => ['wrap'=>'bg-rose-50 text-rose-700 ring-1 ring-rose-200','dot'=>'bg-rose-500'],
             ][$d->status] ?? ['wrap'=>'bg-slate-100 text-slate-700 ring-1 ring-slate-200','dot'=>'bg-slate-400'];
 
-            $isImg   = Str::endsWith(strtolower($d->proof_path ?? ''), ['.jpg','.jpeg','.png','.webp']);
-            $fileUrl = $d->proof_path
-              ? (Str::startsWith($d->proof_path, ['http://','https://'])
-                  ? $d->proof_path
-                  : asset('storage/'.$d->proof_path))
-              : null;
+             $isImg   = Str::endsWith(strtolower($d->proof_path ?? ''), ['.jpg','.jpeg','.png','.webp']);
+             $fileUrl = $d->proof_path
+               ? (Str::startsWith($d->proof_path, ['http://','https://'])
+                   ? $d->proof_path
+                   : route('donations.file', $d))
+               : null;
           @endphp
           <tr>
             <td class="px-4 py-3 font-medium text-slate-900">{{ $d->name }}</td>
