@@ -222,6 +222,7 @@
     </div>
 
     <div class="mt-4 text-right">
+      <!-- <a href="{{ route('galleries.public') }}" class="text-blue-600 hover:underline">Lihat semua →</a> -->
     </div>
   @else
     <p class="text-gray-600">Belum ada item galeri.</p>
