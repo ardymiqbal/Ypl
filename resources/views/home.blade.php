@@ -11,6 +11,7 @@
 @section('content')
 @php
   use Illuminate\Support\Str;
+   use Illuminate\Support\Facades\Route;
 
   // Jika controller tidak mengoper $heroImages, pakai default berikut
   $hero = $heroImages ?? [
@@ -130,6 +131,7 @@
 
   <div class="px-4 md:px-[60px] py-10">
     <div class="max-w-7xl mx-auto">
+
       <div class="text-center">
         <h2 class="inline-block rounded px-2 py-1 sm:bg-transparent text-white text-lg sm:text-2xl md:text-4xl font-semibold tracking-wide">
           Latest News
@@ -137,26 +139,35 @@
       </div>
 
       <div class="mt-6 space-y-6">
-
         @forelse($articles as $a)
           @php
-            // Thumbnail: jika eksternal pakai langsung, jika lokal ambil dari storage/public
-            $thumb = $a->thumbnail
-              ? (Str::startsWith($a->thumbnail, ['http://','https://'])
-                    ? $a->thumbnail
-                    : asset('storage/'.$a->thumbnail))
-              : null;
+            // Tentukan URL thumbnail:
+            // - jika eksternal (http/https) → pakai langsung
+            // - jika ada route('articles.thumb') → stream via route (aman di shared hosting)
+            // - selain itu → fallback ke asset('storage/...')
+            $thumbUrl = null;
+            if ($a->thumbnail) {
+              if (Str::startsWith($a->thumbnail, ['http://','https://','/'])) {
+                $thumbUrl = $a->thumbnail;
+              } elseif (Route::has('articles.thumb')) {
+                $thumbUrl = route('articles.thumb', $a);
+              } else {
+                $thumbUrl = asset('storage/'.$a->thumbnail);
+              }
+            }
           @endphp
 
           <article class="bg-white/90 backdrop-blur-sm rounded-xl shadow">
             <div class="grid gap-5 md:grid-cols-12 p-4 md:p-5">
               <a href="{{ route('articles.show',$a->slug) }}" class="md:col-span-4 block">
-                @if($thumb)
-                  <img class="w-full aspect-[16/9] object-cover rounded-lg shadow"
-                       src="{{ $thumb }}" alt="{{ e($a->title) }}">
+                @if($thumbUrl)
+                  <img
+                    class="w-full aspect-[16/9] object-cover rounded-lg shadow"
+                    src="{{ $thumbUrl }}"
+                    alt="{{ e($a->title) }}">
                 @else
-                  <div class="w-full aspect-[16/9] rounded-lg shadow bg-slate-100 grid place-items-center text-slate-400 text-sm">
-                    Tanpa gambar
+                  <div class="w-full aspect-[16/9] grid place-items-center rounded-lg bg-slate-100 text-slate-400 text-sm">
+                    Tanpa thumbnail
                   </div>
                 @endif
               </a>
@@ -189,6 +200,7 @@
           </div>
         @endif
       </div>
+
     </div>
   </div>
 </section>
