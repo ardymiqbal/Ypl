@@ -45,7 +45,7 @@ class FocusController extends Controller
     {
         $hero = asset('images/fokus-kerja/edukasi/hero.jpg');          
         $imgA   = asset('images/fokus-kerja/edukasi/kegiatan-2.jpeg');  
-        $imgB   = asset('images/fokus-kerja/edukasi/kegiatan-3.jpg');
+        $imgB   = asset('images/fokus-kerja/edukasi/kegiatan-3.JPG');
 
         $latestArticles = Article::query()
             ->where('status', 'published')
