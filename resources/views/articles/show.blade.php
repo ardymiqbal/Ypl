@@ -14,19 +14,23 @@
             <span>·</span>
             {{ $article->created_at->format('d M Y') }}
         </p>
-
     </header>
 
-    {{-- Thumbnail: center, lebar sedang --}}
+    {{-- Thumbnail --}}
+    @php
+        $thumbUrl = Str::startsWith($article->thumbnail, ['http://','https://'])
+            ? $article->thumbnail
+            : route('articles.thumb', $article);
+    @endphp
     <div class="flex justify-center">
         <img
             class="w-full aspect-[16/9] object-cover rounded-2xl shadow"
-            src="{{ Str::startsWith($article->thumbnail,'http') ? $article->thumbnail : asset('storage/'.$article->thumbnail) }}"
+            src="{{ $thumbUrl }}"
             alt="{{ e($article->title) }}"
         >
     </div>
 
-    {{-- Konten utama dalam panel --}}
+    {{-- Konten utama --}}
     <section class="mt-8">
         <div class="bg-white rounded-2xl shadow p-6">
             <div class="text-lg leading-8 break-words [overflow-wrap:anywhere] whitespace-pre-line">
@@ -55,10 +59,13 @@
             <h3 class="text-xl font-semibold">Documentation</h3>
         </div>
 
-        {{-- Grid preview dokumentasi: klik untuk fullscreen --}}
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            @foreach($docs as $d)
-                @php $src = Str::startsWith($d,'http') ? $d : asset('storage/'.$d); @endphp
+            @foreach($docs as $i => $d)
+                @php
+                    $src = Str::startsWith($d, ['http://','https://'])
+                        ? $d
+                        : route('articles.doc', ['article'=>$article, 'i'=>$i]);
+                @endphp
                 <button type="button"
                         class="relative group block w-full overflow-hidden rounded-xl bg-gray-100 shadow js-open-media"
                         data-title="Documentation"
@@ -79,25 +86,27 @@
         <h2 class="text-2xl font-semibold mb-4">Artikel Terkait</h2>
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             @foreach($related as $a)
-            @php
-                $thumbRel = Str::startsWith($a->thumbnail,'http') ? $a->thumbnail : asset('storage/'.$a->thumbnail);
-            @endphp
-            <article class="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden">
-                <a href="{{ route('articles.show',$a->slug) }}">
-                    <img class="w-full aspect-[16/9] object-cover" src="{{ $thumbRel }}" alt="{{ e($a->title) }}">
-                </a>
-                <div class="p-4">
-                    <a href="{{ route('articles.show',$a->slug) }}" class="font-semibold line-clamp-1 hover:text-blue-600">{{ $a->title }}</a>
-                    <p class="text-sm text-gray-500 mt-1">Oleh {{ $a->author }}</p>
-                </div>
-            </article>
+                @php
+                    $thumbRel = Str::startsWith($a->thumbnail, ['http://','https://'])
+                        ? $a->thumbnail
+                        : route('articles.thumb', $a);
+                @endphp
+                <article class="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden">
+                    <a href="{{ route('articles.show',$a->slug) }}">
+                        <img class="w-full aspect-[16/9] object-cover" src="{{ $thumbRel }}" alt="{{ e($a->title) }}">
+                    </a>
+                    <div class="p-4">
+                        <a href="{{ route('articles.show',$a->slug) }}" class="font-semibold line-clamp-1 hover:text-blue-600">{{ $a->title }}</a>
+                        <p class="text-sm text-gray-500 mt-1">Oleh {{ $a->author }}</p>
+                    </div>
+                </article>
             @endforeach
         </div>
     </section>
     @endif
 </article>
 
-{{-- Lightbox / fullscreen modal --}}
+{{-- Lightbox sederhana --}}
 <div id="lightbox" class="fixed inset-0 hidden z-50 bg-black/90 backdrop-blur-sm">
     <div class="absolute top-4 right-4 flex items-center gap-2">
         <span id="lightboxTitle" class="text-white/90 text-sm"></span>
@@ -111,58 +120,42 @@
     </div>
 </div>
 
-{{-- Script: event delegation untuk .js-open-media --}}
 <script>
 (function () {
     const lb       = document.getElementById('lightbox');
     const body     = document.getElementById('lightboxBody');
     const titleEl  = document.getElementById('lightboxTitle');
     const btnClose = document.getElementById('btnCloseLightbox');
-    let escBound   = false;
 
-    function openMediaModal(title, type, src) {
+    function openMediaModal(title, src) {
         if (!lb || !body) return;
         if (titleEl) titleEl.textContent = title || '';
-
         body.innerHTML = '';
         const img = document.createElement('img');
         img.src = src;
         img.alt = title || 'gambar';
         img.className = 'max-w-full max-h-[95vh] w-auto h-auto object-contain rounded';
         body.appendChild(img);
-
         lb.classList.remove('hidden');
         lb.addEventListener('click', onBackdropClick);
         btnClose && btnClose.addEventListener('click', closeMediaModal);
-
-        if (!escBound) {
-            window.addEventListener('keydown', onEscClose);
-            escBound = true;
-        }
+        window.addEventListener('keydown', onEscClose);
     }
-
     function closeMediaModal() {
         if (!lb || !body) return;
         lb.classList.add('hidden');
         body.innerHTML = '';
         lb.removeEventListener('click', onBackdropClick);
         btnClose && btnClose.removeEventListener('click', closeMediaModal);
+        window.removeEventListener('keydown', onEscClose);
     }
-
-    function onBackdropClick(e) {
-        if (e.target === lb) closeMediaModal();
-    }
-
-    function onEscClose(e) {
-        if (e.key === 'Escape') closeMediaModal();
-    }
+    function onBackdropClick(e) { if (e.target === lb) closeMediaModal(); }
+    function onEscClose(e)      { if (e.key === 'Escape') closeMediaModal(); }
 
     document.addEventListener('click', function (e) {
         const btn = e.target.closest('.js-open-media');
         if (!btn) return;
-        const title = btn.dataset.title || '';
-        const src   = btn.dataset.src   || '';
-        openMediaModal(title, 'image', src);
+        openMediaModal(btn.dataset.title || '', btn.dataset.src || '');
     });
 })();
 </script>
