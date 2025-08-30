@@ -178,6 +178,7 @@
 
 {{-- ================= GALERI: SHOW 3 ONLY, CENTER HIGHLIGHT ================= --}}
 @php
+  use Illuminate\Support\Str;
 
   $galItems = collect($galleryImages ?? [])->map(function($g){
     $mediaUrl = Str::startsWith($g->media_path, ['http://','https://'])
@@ -216,6 +217,9 @@
          class="mt-2 sm:mt-3 flex items-stretch justify-center gap-3 sm:gap-4 select-none
                 transition-opacity duration-300 ease-out
                 min-h-[160px] sm:min-h-[220px] md:min-h-[280px]">
+    </div>
+    <div class="mt-4 text-right">
+      <!-- <a href="{{ route('galleries.public') }}" class="text-blue-600 hover:underline">Lihat semua →</a> -->
     </div>
   @else
     <p class="text-gray-600">Belum ada item galeri.</p>
