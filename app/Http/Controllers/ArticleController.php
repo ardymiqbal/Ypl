@@ -207,21 +207,44 @@ class ArticleController extends Controller
      * MEDIA ROUTES (STREAMING)
      * ========================= */
 
+    protected function normalizePublicDiskPath(?string $path): ?string
+    {
+        if (!$path) return null;
+        $p = ltrim($path, '/');
+
+        // Buang prefix yang sering bikin bingung
+        if (Str::startsWith($p, 'storage/')) {
+            $p = substr($p, 8); // 'storage/' -> ''
+        } elseif (Str::startsWith($p, 'public/')) {
+            $p = substr($p, 7); // 'public/'  -> ''
+        }
+        return $p; // contoh: 'thumbnails/xxx.jpg' atau 'documentation/yyy.png'
+    }
+
+    protected function fullLocalPathOnPublicDisk(string $relative): string
+    {
+        // Map ke storage/app/public/...
+        return storage_path('app/public/'.ltrim($relative,'/'));
+    }
+
     /** Tampilkan thumbnail artikel (lokal) lewat streaming file. */
     public function thumb(Article $article)
     {
         $path = $article->thumbnail;
         if (!$path) abort(404);
 
-        // Jika URL eksternal, redirect saja
+        // URL eksternal? redirect saja
         if (Str::startsWith($path, ['http://','https://'])) {
             return redirect()->away($path);
         }
 
-        $full = storage_path('app/public/'.$path);
+        // Normalisasi dan stream
+        $rel  = $this->normalizePublicDiskPath($path);
+        $full = $this->fullLocalPathOnPublicDisk($rel);
+
         if (!is_file($full)) abort(404);
 
-        // Tanpa set mime manual (aman untuk shared hosting)
+        // Cukup file() agar tidak tergantung symlink /storage
         return response()->file($full);
     }
 
@@ -237,11 +260,15 @@ class ArticleController extends Controller
         if (!isset($docs[$i])) abort(404);
         $path = $docs[$i];
 
+        // URL eksternal? redirect
         if (Str::startsWith($path, ['http://','https://'])) {
             return redirect()->away($path);
         }
 
-        $full = storage_path('app/public/'.$path);
+        // Normalisasi dan stream
+        $rel  = $this->normalizePublicDiskPath($path);
+        $full = $this->fullLocalPathOnPublicDisk($rel);
+
         if (!is_file($full)) abort(404);
 
         return response()->file($full);
