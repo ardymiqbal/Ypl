@@ -139,7 +139,7 @@
       <div class="mt-6 space-y-6">
         @forelse($articles as $a)
           @php
-            $thumbUrl = Str::startsWith($a->thumbnail,'http') ? $a->thumbnail : asset('storage/'.$a->thumbnail);
+            $thumb = Str::startsWith($a->thumbnail,'http') ? $a->thumbnail : asset('articles.thumb'.$a->thumbnail);
           @endphp
           <article class="bg-white/90 backdrop-blur-sm rounded-xl shadow">
             <div class="grid gap-5 md:grid-cols-12 p-4 md:p-5">
@@ -181,7 +181,7 @@
   $galItems = collect($galleryImages ?? [])->map(function($g){
     $mediaUrl = Str::startsWith($g->media_path, ['http://','https://'])
       ? $g->media_path
-      : route('galleries.thumb', $g); // <-- ambil via route streaming
+      : route('galleries.media', $g); // <-- ambil via route streaming
     return ['title'=>$g->title, 'type'=>$g->media_type, 'src'=>$mediaUrl];
   })->values()->all();
 @endphp
