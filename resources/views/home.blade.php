@@ -181,7 +181,7 @@
   $galItems = collect($galleryImages ?? [])->map(function($g){
     $mediaUrl = Str::startsWith($g->media_path, ['http://','https://'])
       ? $g->media_path
-      : route('galleries.media', $g); // <-- ambil via route streaming
+      : route('galleries.thumb', $g); // <-- ambil via route streaming
     return ['title'=>$g->title, 'type'=>$g->media_type, 'src'=>$mediaUrl];
   })->values()->all();
 @endphp
