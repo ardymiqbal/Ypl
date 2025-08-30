@@ -7,49 +7,36 @@
   use Illuminate\Support\Str;
   use Illuminate\Support\Facades\Route;
 
-  // ==== Thumbnail URL (aman di shared hosting) ====
+  // === URL thumbnail aman ===
   $thumbUrl = null;
-  if ($article->thumbnail) {
+  if (!empty($article->thumbnail)) {
     if (Str::startsWith($article->thumbnail, ['http://','https://','/'])) {
       $thumbUrl = $article->thumbnail;
     } elseif (Route::has('articles.thumb')) {
       $thumbUrl = route('articles.thumb', $article);
     } else {
-      // normalisasi ke asset
-      $t = ltrim($article->thumbnail, '/');
-      if (Str::startsWith($t, 'public/')) {
-        $t = 'storage/'.substr($t, 7); // public/... -> storage/...
-      } elseif (!Str::startsWith($t, 'storage/')) {
-        $t = 'storage/'.$t;
-      }
-      $thumbUrl = asset($t);
+      // fallback terakhir (jika web server mengizinkan akses /storage)
+      $thumbUrl = asset('storage/'.$article->thumbnail);
     }
   }
 
-  // ==== Helper URL dokumentasi (normalisasi path) ====
-  $docUrl = function (?string $p) {
-    if (!$p) return null;
-    if (Str::startsWith($p, ['http://','https://','/'])) return $p;
-
-    $p = ltrim($p, '/');
-    if (Str::startsWith($p, 'public/')) {
-      $p = 'storage/'.substr($p, 7);          // public/... -> storage/...
-    } elseif (!Str::startsWith($p, 'storage/')) {
-      $p = 'storage/'.$p;                      // relatif -> storage/relatif
-    }
-    return asset($p);
-  };
-
-  // Ambil array dokumentasi dengan aman
+  // === Ambil dokumentasi sebagai array ===
   $docs = is_array($article->documentation)
-    ? $article->documentation
-    : (json_decode($article->documentation ?? '[]', true) ?: []);
+            ? $article->documentation
+            : (json_decode($article->documentation ?? '[]', true) ?: []);
+
+  // === helper base64-url (untuk route articles.doc) ===
+  $b64url = function (string $path) {
+    return rtrim(strtr(base64_encode($path), '+/', '-_'), '=');
+  };
 @endphp
 
 <h1 class="text-2xl font-bold mb-4">Edit Artikel</h1>
 
 <form method="POST" action="{{ route('articles.update',$article) }}" enctype="multipart/form-data" class="bg-white rounded-xl shadow p-6 space-y-4">
-@csrf @method('PUT')
+  @csrf
+  @method('PUT')
+
   <div>
     <label class="block text-sm font-medium">Judul</label>
     <input name="title" value="{{ old('title', $article->title) }}" class="mt-1 w-full border rounded p-2" required>
@@ -111,8 +98,9 @@
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
         @foreach($docs as $p)
           @php
-            $src = $docUrl($p); // <- gunakan normalisasi path
-            $isVideo = Str::endsWith(strtolower((string)$p), ['.mp4','.mov','.avi','.mkv','.webm']);
+            $enc    = $b64url($p);
+            $src    = route('articles.doc', ['p' => $enc]);  // stream via route
+            $isVideo = Str::endsWith(Str::lower($p), ['.mp4','.mov','.avi','.mkv','.webm']);
           @endphp
           <label class="border rounded p-2 flex gap-2 items-start bg-gray-50">
             <input type="checkbox" name="keep_existing_docs[]" value="{{ $p }}" checked class="mt-1">
@@ -134,6 +122,7 @@
 
   <div>
     <label class="block text-sm font-medium">Tambah Documentation (opsional, maks 3 total)</label>
+    {{-- sesuai validasi controller: hanya gambar --}}
     <input type="file" name="documentation[]" multiple class="mt-1 w-full border rounded p-2" accept="image/*">
     @error('documentation.*')<div class="text-red-600 text-sm">{{ $message }}</div>@enderror
     @error('documentation')<div class="text-red-600 text-sm">{{ $message }}</div>@enderror
