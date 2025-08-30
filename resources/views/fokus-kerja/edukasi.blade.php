@@ -135,15 +135,15 @@
     <div class="mt-3 grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
       @foreach($latestArticles as $a)
         @php
-          $thumb = Str::startsWith($a->thumbnail,'http') ? $a->thumbnail : asset('storage/'.$a->thumbnail);
+          $thumb = Str::startsWith($a->thumbnail,'http') ? $a->thumbnail : route('articles.thumb'.$a->thumbnail);
         @endphp
         <article class="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden ring-1 ring-black/5">
-          <a href="{{ route('articles.thumb',$a->slug) }}">
+          <a href="{{ route('articles.show',$a->slug) }}">
             <img src="{{ $thumb }}" alt="{{ e($a->title) }}"
                  class="w-full aspect-[16/10] md:aspect-[16/9] object-cover">
           </a>
           <div class="p-3 sm:p-4">
-            <a href="{{ route('articles.thumb',$a->slug) }}"
+            <a href="{{ route('articles.show',$a->slug) }}"
                class="font-semibold leading-snug line-clamp-2 hover:text-blue-600 text-[15px] sm:text-base">
               {{ $a->title }}
             </a>
