@@ -28,6 +28,9 @@ Route::get('/artikel/{slug}', [HomeController::class, 'showArticle'])
 Route::get('/galeri', [GalleryController::class, 'public'])
   ->name('galleries.public');
 
+// === STREAM MEDIA DARI STORAGE (gambar/video)
+Route::get('/media/gallery/{gallery}', [GalleryController::class, 'media'])->name('galleries.media');
+
 /*
 |--------------------------------------------------------------------------
 | Fokus Kerja (Program)

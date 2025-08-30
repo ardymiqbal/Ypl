@@ -6,6 +6,8 @@ use App\Models\Gallery;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class GalleryController extends Controller
 {
@@ -116,4 +118,78 @@ public function edit(Gallery $gallery)
         $gallery->delete();
         return back()->with('success','Item galeri dihapus.');
     }
+
+    public function media(Request $request, Gallery $gallery): StreamedResponse
+{
+    // Jika item tidak published dan bukan admin -> 404 (opsional, sesuai kebijakanmu)
+    if (!$gallery->is_published && !auth('admin')->check()) {
+        abort(404);
+    }
+
+    // Jika path adalah URL eksternal, redirect saja
+    if (Str::startsWith($gallery->media_path, ['http://','https://'])) {
+        return redirect()->to($gallery->media_path);
+    }
+
+    // Coba ambil dari disk 'public' (sesuai kode store/update mu sekarang)
+    $disk = Storage::disk('public');
+    $path = $gallery->media_path;
+
+    // Fallback: kalau ternyata filenya disimpan di 'local', coba disk local
+    if (!$disk->exists($path)) {
+        $disk = Storage::disk('local');
+        if (!$disk->exists($path)) abort(404);
+    }
+
+    $size = $disk->size($path);
+    $mime = $disk->mimeType($path) ?: 'application/octet-stream';
+    $absolute = $disk->path($path);
+
+    // Dukungan HTTP Range (agar video bisa di-seek)
+    $range = $request->header('Range'); // contoh: bytes=0- or bytes=1000-2000
+    $start = 0;
+    $end   = $size - 1;
+    $status = 200;
+    $headers = [
+        'Content-Type'        => $mime,
+        'Accept-Ranges'       => 'bytes',
+        'Cache-Control'       => 'public, max-age=86400',
+        'Content-Disposition' => 'inline; filename="'.basename($path).'"',
+        'Content-Length'      => $size,
+    ];
+
+    if ($range && preg_match('/bytes=(\d*)-(\d*)/i', $range, $m)) {
+        $start = ($m[1] !== '') ? (int)$m[1] : $start;
+        $end   = ($m[2] !== '') ? (int)$m[2] : $end;
+
+        if ($start > $end || $start > $size - 1) {
+            return response('', 416, ['Content-Range' => "bytes */{$size}"]);
+        }
+
+        $status = 206;
+        $length = $end - $start + 1;
+        $headers['Content-Length'] = $length;
+        $headers['Content-Range']  = "bytes {$start}-{$end}/{$size}";
+    }
+
+    return response()->stream(function () use ($absolute, $start, $end) {
+        $chunk = 8192;
+        $fh = fopen($absolute, 'rb');
+        if ($fh === false) return;
+        try {
+            fseek($fh, $start);
+            $remain = $end - $start + 1;
+            while ($remain > 0 && !feof($fh)) {
+                $read = ($remain > $chunk) ? $chunk : $remain;
+                $buffer = fread($fh, $read);
+                echo $buffer;
+                flush();
+                $remain -= strlen($buffer);
+                if (connection_aborted()) break;
+            }
+        } finally {
+            fclose($fh);
+        }
+    }, $status, $headers);
+}
 }

@@ -178,24 +178,22 @@
 
 {{-- ================= GALERI: SHOW 3 ONLY, CENTER HIGHLIGHT ================= --}}
 @php
+  use Illuminate\Support\Str;
+
   $galItems = collect($galleryImages ?? [])->map(function($g){
-    $mediaUrl = Str::startsWith($g->media_path,'http') ? $g->media_path : asset('storage/'.$g->media_path);
-    return ['title'=>$g->title, 'type'=>$g->media_type, 'src'=>$mediaUrl]; // <-- pakai media_type
+    $mediaUrl = Str::startsWith($g->media_path, ['http://','https://'])
+      ? $g->media_path
+      : route('galleries.media', $g); // <-- ambil via route streaming
+    return ['title'=>$g->title, 'type'=>$g->media_type, 'src'=>$mediaUrl];
   })->values()->all();
 @endphp
-
 
 <section id="gallery3"
          class="mt-10 px-4 md:px-0 overflow-x-hidden"
          data-items='{{ json_encode($galItems, JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) }}'>
   <div class="grid grid-cols-[1fr_auto_1fr] items-center mb-4 md:mb-6">
-    <!-- kolom kiri (spacer) -->
     <div></div>
-
-    <!-- judul tepat di tengah -->
     <h2 class="justify-self-center text-3xl font-bold">Galeri</h2>
-
-    <!-- tombol di kanan -->
     <div class="justify-self-end flex gap-2">
       <button id="g3Prev" type="button"
         class="p-2 rounded-full bg-white shadow ring-1 ring-black/5 hover:bg-gray-50"
@@ -216,13 +214,9 @@
 
   @if($galleryImages->count())
     <div id="g3Wrap"
-     class="mt-2 sm:mt-3 flex items-stretch justify-center gap-3 sm:gap-4 select-none
-            transition-opacity duration-300 ease-out
-            min-h-[160px] sm:min-h-[220px] md:min-h-[280px]">
-    </div>
-
-    <div class="mt-4 text-right">
-      <!-- <a href="{{ route('galleries.public') }}" class="text-blue-600 hover:underline">Lihat semua →</a> -->
+         class="mt-2 sm:mt-3 flex items-stretch justify-center gap-3 sm:gap-4 select-none
+                transition-opacity duration-300 ease-out
+                min-h-[160px] sm:min-h-[220px] md:min-h-[280px]">
     </div>
   @else
     <p class="text-gray-600">Belum ada item galeri.</p>
@@ -233,16 +227,15 @@
 @php
   $v = $featuredVideo ?? null;
   $vSrc = $v
-    ? (Str::startsWith($v->media_path,'http')
+    ? (Str::startsWith($v->media_path, ['http://','https://'])
         ? $v->media_path
-        : asset('storage/'.$v->media_path))
+        : route('galleries.media', $v))  // <-- via route streaming
     : null;
 @endphp
 
 @if($v && $vSrc)
 <section id="featuredVideo" class="mt-12">
   <div class="max-w-6xl mx-auto">
-
     <article class="rounded-2xl overflow-hidden bg-white ring-1">
       <div class="relative">
         <video
@@ -253,12 +246,11 @@
           playsinline
         ></video>
       </div>
-
-      
     </article>
   </div>
 </section>
 @endif
+
 
 {{-- ================= PARTNER ================= --}}
 <section class="mt-12 p-6 md:p-8">
