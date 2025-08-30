@@ -53,7 +53,7 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h2l2 4-2 1c.6 1.8 2.2 3.4 4 4l1-2 4 2v2a2 2 0 01-2 2h-1C7.8 18 3 13.2 3 7V5z"/>
             </svg>
-            <p>082398814571</p>
+            <p>082398814671</p>
           </div>
         </div>
 
