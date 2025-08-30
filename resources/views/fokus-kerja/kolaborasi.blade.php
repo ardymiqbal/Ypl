@@ -117,7 +117,12 @@
     <div class="mt-3 grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
       @foreach($latestArticles as $a)
         @php
-          $thumb = Str::startsWith($a->thumbnail,'http') ? $a->thumbnail : route('articles.thumb'.$a->thumbnail);
+          // Jika thumbnail eksternal → pakai langsung; jika lokal → stream via route agar aman di shared hosting
+          $thumb = $a->thumbnail
+            ? (Str::startsWith($a->thumbnail, ['http://','https://'])
+                ? $a->thumbnail
+                : route('articles.thumb', $a))
+            : null;
         @endphp
         <article class="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden ring-1 ring-black/5">
           <a href="{{ route('articles.show',$a->slug) }}">

@@ -40,7 +40,12 @@
     <div class="space-y-4 md:space-y-6">
       @foreach($articles as $a)
         @php
-          $thumbUrl = Str::startsWith($a->thumbnail,'http') ? $a->thumbnail : asset('storage/'.$a->thumbnail);
+          // Pakai URL absolut jika sudah http/https; jika tidak, ambil via route streaming supaya aman di shared hosting
+          $thumbUrl = $a->thumbnail
+            ? (Str::startsWith($a->thumbnail, ['http://','https://'])
+                ? $a->thumbnail
+                : route('articles.thumb', $a))
+            : null;
         @endphp
 
         {{-- Kartu artikel: vertikal di mobile, dua kolom di desktop --}}
@@ -48,15 +53,21 @@
           <div class="grid gap-4 md:gap-5 md:grid-cols-12">
             {{-- Thumbnail --}}
             <a href="{{ route('articles.show',$a->slug) }}" class="block md:col-span-4">
-              <img
-                class="w-full aspect-[16/10] md:aspect-[16/9] object-cover rounded-xl md:rounded-lg shadow md:shadow-none"
-                loading="lazy" decoding="async"
-                src="{{ $thumbUrl }}" alt="{{ e($a->title) }}">
+              @if($thumbUrl)
+                <img
+                  class="w-full aspect-[16/10] md:aspect-[16/9] object-cover rounded-xl md:rounded-lg shadow md:shadow-none"
+                  loading="lazy" decoding="async"
+                  src="{{ $thumbUrl }}" alt="{{ e($a->title) }}">
+              @else
+                <div class="w-full aspect-[16/10] md:aspect-[16/9] rounded-xl md:rounded-lg bg-slate-100 grid place-items-center text-slate-400 text-sm">
+                  Tanpa gambar
+                </div>
+              @endif
             </a>
 
             {{-- Teks --}}
             <div class="md:col-span-8">
-              {{-- Hashtag: bisa banyak, tetap rapi di mobile --}}
+              {{-- Hashtag --}}
               <div class="flex flex-wrap gap-2 mb-1 -mx-1">
                 @foreach($a->hashtag_array as $t)
                   <a href="{{ route('articles.public.index',['q'=>$t]) }}"
