@@ -30,7 +30,7 @@
     @php
       $src = Str::startsWith($g->media_path, ['http://','https://'])
               ? $g->media_path
-              : asset('storage/'.$g->media_path);
+              : route('galleries.media', $g);
       $published = (bool) $g->is_published;
       $isImage   = $g->media_type === 'image';
     @endphp
@@ -41,9 +41,7 @@
         @if($isImage)
           <img src="{{ $src }}" alt="{{ e($g->title) }}" class="w-full aspect-[16/10] object-cover">
         @elseif($g->media_type === 'video')
-          <video class="w-full aspect-[16/10] object-cover" preload="metadata" muted playsinline>
-            <source src="{{ $src }}#t=0.1" type="video/mp4">
-          </video>
+          <video src="{{ $src }}#t=0.1" class="w-full aspect-[16/10] object-cover" preload="metadata" muted playsinline controls></video>
         @else
           <div class="w-full aspect-[16/10] grid place-items-center text-slate-400 text-sm">Tidak ada preview</div>
         @endif
@@ -115,7 +113,7 @@
           @php
             $src = Str::startsWith($g->media_path, ['http://','https://'])
                     ? $g->media_path
-                    : asset('storage/'.$g->media_path);
+                    : route('galleries.media', $g);
             $published = (bool) $g->is_published;
             $isImage   = $g->media_type === 'image';
           @endphp
@@ -137,9 +135,7 @@
               @if($isImage)
                 <img src="{{ $src }}" alt="{{ e($g->title) }}" class="w-28 h-16 object-cover rounded ring-1 ring-black/5">
               @elseif($g->media_type === 'video')
-                <video class="w-28 h-16 object-cover rounded ring-1 ring-black/5" preload="metadata" muted playsinline>
-                  <source src="{{ $src }}#t=0.1" type="video/mp4">
-                </video>
+                <video src="{{ $src }}#t=0.1" class="w-28 h-16 object-cover rounded ring-1 ring-black/5" preload="metadata" muted playsinline></video>
               @else
                 <span class="text-slate-400 text-xs">—</span>
               @endif

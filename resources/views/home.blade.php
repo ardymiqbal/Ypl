@@ -174,11 +174,10 @@
       </div>
     </div>
   </div>
-</section>
+</section
 
 {{-- ================= GALERI: SHOW 3 ONLY, CENTER HIGHLIGHT ================= --}}
 @php
-
   $galItems = collect($galleryImages ?? [])->map(function($g){
     $mediaUrl = Str::startsWith($g->media_path, ['http://','https://'])
       ? $g->media_path
