@@ -61,7 +61,7 @@
       <div class="mt-5 rounded-xl bg-slate-50 ring-1 ring-slate-200 p-3 border-l-4 border-blue-300">
         <p class="text-sm text-slate-900 font-semibold">Instruksi</p>
         <ol class="mt-1 text-sm text-slate-700 list-decimal list-inside space-y-1">
-          <li>Transfer ke rekening BCA di atas.</li>
+          <li>Transfer ke rekening BNI di atas.</li>
           <li>Simpan bukti transfer.</li>
           <li>Upload bukti pada formulir di sebelah.</li>
         </ol>
