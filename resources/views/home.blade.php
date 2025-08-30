@@ -137,15 +137,30 @@
       </div>
 
       <div class="mt-6 space-y-6">
+
         @forelse($articles as $a)
           @php
-            $thumb = Str::startsWith($a->thumbnail,'http') ? $a->thumbnail : asset('articles.thumb'.$a->thumbnail);
+            // Thumbnail: jika eksternal pakai langsung, jika lokal ambil dari storage/public
+            $thumb = $a->thumbnail
+              ? (Str::startsWith($a->thumbnail, ['http://','https://'])
+                    ? $a->thumbnail
+                    : asset('storage/'.$a->thumbnail))
+              : null;
           @endphp
+
           <article class="bg-white/90 backdrop-blur-sm rounded-xl shadow">
             <div class="grid gap-5 md:grid-cols-12 p-4 md:p-5">
               <a href="{{ route('articles.show',$a->slug) }}" class="md:col-span-4 block">
-                <img class="w-full aspect-[16/9] object-cover rounded-lg shadow" src="{{ $thumbUrl }}" alt="{{ e($a->title) }}">
+                @if($thumb)
+                  <img class="w-full aspect-[16/9] object-cover rounded-lg shadow"
+                       src="{{ $thumb }}" alt="{{ e($a->title) }}">
+                @else
+                  <div class="w-full aspect-[16/9] rounded-lg shadow bg-slate-100 grid place-items-center text-slate-400 text-sm">
+                    Tanpa gambar
+                  </div>
+                @endif
               </a>
+
               <div class="md:col-span-8">
                 <div class="flex flex-wrap gap-2 text-xs mb-1">
                   @foreach($a->hashtag_array as $t)
@@ -155,7 +170,9 @@
                 <h3 class="text-xl md:text-2xl font-extrabold leading-snug">
                   <a href="{{ route('articles.show',$a->slug) }}" class="hover:underline">{{ $a->title }}</a>
                 </h3>
-                <p class="mt-2 text-gray-700 text-[15px] sm:text-sm md:text-base leading-6 sm:leading-6 md:leading-7 line-clamp-3">{{ $a->summary }}</p>
+                <p class="mt-2 text-gray-700 text-[15px] sm:text-sm md:text-base leading-6 sm:leading-6 md:leading-7 line-clamp-3">
+                  {{ $a->summary }}
+                </p>
                 <p class="mt-2 text-xs text-gray-500">{{ $a->author }} · {{ $a->created_at->format('d M Y') }}</p>
               </div>
             </div>
