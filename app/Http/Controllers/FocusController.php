@@ -12,7 +12,7 @@ class FocusController extends Controller
     public function sampah()
     {
         // === Poster (portrait) ===
-        $posterDir = asset('images/fokus-kerja/sampah/poster');
+        $posterDir = 'images/fokus-kerja/sampah/poster';
         $posters = collect(is_dir($posterDir) ? File::files($posterDir) : [])
             ->filter(fn($f) => in_array(strtolower($f->getExtension()), ['jpg','jpeg','png','webp']))
             ->sortBy(fn($f) => $f->getFilename())
