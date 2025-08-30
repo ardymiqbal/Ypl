@@ -41,7 +41,7 @@
       $url = $donation->proof_path
         ? (Str::startsWith($donation->proof_path, ['http://','https://'])
             ? $donation->proof_path
-            : asset('donations.file'.$donation->proof_path))
+            : route('donations.file'.$donation->proof_path))
         : null;
       $isImg = Str::endsWith(strtolower($donation->proof_path ?? ''), ['.jpg','.jpeg','.png','.webp']);
     @endphp
