@@ -178,7 +178,6 @@
 
 {{-- ================= GALERI: SHOW 3 ONLY, CENTER HIGHLIGHT ================= --}}
 @php
-  use Illuminate\Support\Str;
 
   $galItems = collect($galleryImages ?? [])->map(function($g){
     $mediaUrl = Str::startsWith($g->media_path, ['http://','https://'])
