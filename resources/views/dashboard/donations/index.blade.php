@@ -3,7 +3,9 @@
 @section('title','Donasi — Dashboard')
 
 @section('content')
-@php use Illuminate\Support\Str; @endphp
+@php
+  use Illuminate\Support\Str;
+@endphp
 
 <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold mb-4 text-slate-900">Donasi</h1>
 
@@ -35,6 +37,12 @@
   @forelse($donations as $d)
     @php
       $isImg = Str::endsWith(strtolower($d->proof_path ?? ''), ['.jpg','.jpeg','.png','.webp']);
+      $fileUrl = $d->proof_path
+        ? (Str::startsWith($d->proof_path, ['http://','https://'])
+            ? $d->proof_path
+            : asset('storage/'.$d->proof_path))
+        : null;
+
       $badge = [
         'pending'  => 'bg-amber-50 text-amber-700 ring-1 ring-amber-200',
         'verified' => 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200',
@@ -50,14 +58,17 @@
     <article class="rounded-xl bg-white ring-1 ring-slate-200 shadow-sm overflow-hidden">
       {{-- Bukti / preview --}}
       <div class="bg-slate-50">
-        @if($isImg)
-          <img src="{{ asset('storage/'.$d->proof_path) }}" alt="Bukti transfer" class="w-full aspect-[16/10] object-cover">
-        @else
+        @if($fileUrl && $isImg)
+          <img src="{{ $fileUrl }}" alt="Bukti transfer" class="w-full aspect-[16/10] object-cover">
+        @elseif($fileUrl)
           <div class="w-full aspect-[16/10] grid place-items-center text-slate-500 text-sm">
-            <a href="{{ asset('storage/'.$d->proof_path) }}" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg ring-1 ring-slate-300 hover:bg-slate-100">
+            <a href="{{ $fileUrl }}" target="_blank" rel="noopener"
+               class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg ring-1 ring-slate-300 hover:bg-slate-100">
               Lihat File
             </a>
           </div>
+        @else
+          <div class="w-full aspect-[16/10] grid place-items-center text-slate-400 text-sm">Tidak ada file</div>
         @endif
       </div>
 
@@ -125,6 +136,13 @@
               'verified' => ['wrap'=>'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200','dot'=>'bg-emerald-500'],
               'rejected' => ['wrap'=>'bg-rose-50 text-rose-700 ring-1 ring-rose-200','dot'=>'bg-rose-500'],
             ][$d->status] ?? ['wrap'=>'bg-slate-100 text-slate-700 ring-1 ring-slate-200','dot'=>'bg-slate-400'];
+
+            $isImg   = Str::endsWith(strtolower($d->proof_path ?? ''), ['.jpg','.jpeg','.png','.webp']);
+            $fileUrl = $d->proof_path
+              ? (Str::startsWith($d->proof_path, ['http://','https://'])
+                  ? $d->proof_path
+                  : asset('storage/'.$d->proof_path))
+              : null;
           @endphp
           <tr>
             <td class="px-4 py-3 font-medium text-slate-900">{{ $d->name }}</td>
@@ -136,10 +154,12 @@
               </span>
             </td>
             <td class="px-4 py-3">
-              @if(Str::endsWith(strtolower($d->proof_path ?? ''), ['.jpg','.jpeg','.png','.webp']))
-                <img src="{{ asset('storage/'.$d->proof_path) }}" class="h-10 w-16 object-cover rounded ring-1 ring-black/5" alt="">
+              @if($fileUrl && $isImg)
+                <img src="{{ $fileUrl }}" class="h-10 w-16 object-cover rounded ring-1 ring-black/5" alt="">
+              @elseif($fileUrl)
+                <a href="{{ $fileUrl }}" class="text-sky-600 hover:underline" target="_blank" rel="noopener">Lihat File</a>
               @else
-                <a href="{{ asset('storage/'.$d->proof_path) }}" class="text-sky-600 hover:underline" target="_blank">Lihat File</a>
+                <span class="text-slate-400">—</span>
               @endif
             </td>
             <td class="px-4 py-3 text-slate-600">{{ $d->created_at->format('d M Y H:i') }}</td>

@@ -106,4 +106,6 @@ Route::middleware('admin.404')->prefix('dashboard')->group(function () {
     Route::resource('articles',  ArticleController::class)->except(['show']);
     Route::resource('galleries', GalleryController::class)->except(['show']);
     Route::resource('donations', DonationController::class)->only(['index','show','edit','update','destroy']);
+    Route::get('/media/donations/{donation}', [DonationController::class, 'file'])
+    ->name('donations.file');
 });

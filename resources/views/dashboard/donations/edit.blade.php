@@ -3,6 +3,10 @@
 @section('title','Edit Donasi — Dashboard')
 
 @section('content')
+@php
+  use Illuminate\Support\Str;
+@endphp
+
 <a href="{{ route('donations.index') }}" class="text-blue-600 hover:underline">← Kembali</a>
 
 <div class="mt-3 bg-white rounded-xl shadow ring-1 ring-black/5 p-6">
@@ -26,13 +30,18 @@
   </div>
 
   @if($donation->proof_path)
+    @php
+      $fileUrl = Str::startsWith($donation->proof_path, ['http://','https://'])
+        ? $donation->proof_path
+        : asset('storage/'.$donation->proof_path);
+      $lower = strtolower($donation->proof_path);
+    @endphp
     <div class="mb-6">
       <span class="block text-sm text-gray-600 mb-1">Bukti Transfer</span>
-      @php $lower = strtolower($donation->proof_path); @endphp
       @if(Str::endsWith($lower, ['.jpg','.jpeg','.png','.webp']))
-        <img src="{{ asset('storage/'.$donation->proof_path) }}" class="h-40 rounded border" alt="">
+        <img src="{{ $fileUrl }}" class="h-40 rounded border" alt="">
       @else
-        <a href="{{ asset('storage/'.$donation->proof_path) }}" target="_blank" class="text-blue-600 hover:underline">
+        <a href="{{ $fileUrl }}" target="_blank" rel="noopener" class="text-blue-600 hover:underline">
           Lihat file
         </a>
       @endif

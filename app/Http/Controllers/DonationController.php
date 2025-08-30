@@ -74,7 +74,7 @@ class DonationController extends Controller
     }
 
     /** UPDATE (Dashboard) */
-   public function update(Request $request, Donation $donation)
+    public function update(Request $request, Donation $donation)
     {
         // Validasi hanya kolom status
         $validated = $request->validate([
@@ -87,9 +87,9 @@ class DonationController extends Controller
         ]);
 
         return redirect()
-        ->route('donations.show', $donation)  
-        ->with('success', 'Status donasi berhasil diperbarui.');
-        }
+            ->route('donations.show', $donation)
+            ->with('success', 'Status donasi berhasil diperbarui.');
+    }
 
     /** DELETE (Dashboard) */
     public function destroy(Donation $donation)
@@ -100,7 +100,7 @@ class DonationController extends Controller
         $donation->delete();
 
         return redirect()
-        ->route('donations.index', $donation)  
-        ->with('success', 'Donasi dihapus.');
+            ->route('donations.index')
+            ->with('success', 'Donasi dihapus.');
     }
 }

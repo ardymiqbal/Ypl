@@ -3,6 +3,10 @@
 @section('title','Detail Donasi — Dashboard')
 
 @section('content')
+@php
+  use Illuminate\Support\Str;
+@endphp
+
 <a href="{{ route('donations.index') }}" class="text-blue-600 hover:underline">← Kembali</a>
 
 <div class="mt-3 bg-white rounded-xl shadow ring-1 ring-black/5 p-6">
@@ -33,10 +37,21 @@
 
   <div class="mt-5">
     <h2 class="font-semibold mb-2">Bukti Transfer</h2>
-    @if(Str::endsWith(strtolower($donation->proof_path), ['.jpg','.jpeg','.png','.webp']))
-      <img src="{{ asset('storage/'.$donation->proof_path) }}" class="w-full max-w-lg rounded shadow" alt="">
+    @php
+      $url = $donation->proof_path
+        ? (Str::startsWith($donation->proof_path, ['http://','https://'])
+            ? $donation->proof_path
+            : asset('storage/'.$donation->proof_path))
+        : null;
+      $isImg = Str::endsWith(strtolower($donation->proof_path ?? ''), ['.jpg','.jpeg','.png','.webp']);
+    @endphp
+
+    @if($url && $isImg)
+      <img src="{{ $url }}" class="w-full max-w-lg rounded shadow" alt="">
+    @elseif($url)
+      <iframe src="{{ $url }}" class="w-full h-[60vh] rounded"></iframe>
     @else
-      <iframe src="{{ asset('storage/'.$donation->proof_path) }}" class="w-full h-[60vh] rounded"></iframe>
+      <div class="text-slate-500">Tidak ada bukti transfer.</div>
     @endif
   </div>
 
