@@ -174,7 +174,7 @@
       </div>
     </div>
   </div>
-</section
+</section>
 
 {{-- ================= GALERI: SHOW 3 ONLY, CENTER HIGHLIGHT ================= --}}
 @php
