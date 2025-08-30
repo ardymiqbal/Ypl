@@ -38,11 +38,11 @@
   <div class="mt-5">
     <h2 class="font-semibold mb-2">Bukti Transfer</h2>
     @php
-      $url = $donation->proof_path
-        ? (Str::startsWith($donation->proof_path, ['http://','https://'])
-            ? $donation->proof_path
-            : route('donations.file'.$donation->proof_path))
-        : null;
+      $url   = $donation->proof_path
+                ? (Str::startsWith($donation->proof_path, ['http://','https://'])
+                    ? $donation->proof_path
+                    : route('donations.file', $donation))
+                : null;
       $isImg = Str::endsWith(strtolower($donation->proof_path ?? ''), ['.jpg','.jpeg','.png','.webp']);
     @endphp
 
