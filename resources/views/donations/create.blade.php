@@ -27,23 +27,23 @@
         <div>
           <p class="text-xs uppercase tracking-wide text-slate-500">Bank</p>
           <div class="mt-1 inline-flex items-center gap-2">
-            <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 ring-1 ring-blue-200 text-xs font-semibold">
-              BCA
+            <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-yellow-50 text-yellow-700 ring-1 ring-yellow-200 text-xs font-semibold">
+              BNI
             </span>
-            <span class="text-slate-700">Bank Central Asia</span>
+            <span class="text-slate-700">Bank Negara Indonesia</span>
           </div>
         </div>
 
         <div>
           <p class="text-xs uppercase tracking-wide text-slate-500">Atas Nama</p>
-          <p class="mt-1 font-semibold text-slate-900">Aaa####</p>
+          <p class="mt-1 font-semibold text-slate-900">YAYASAN PEMERHATI LINGKUNGAN</p>
         </div>
 
         <div>
           <p class="text-xs uppercase tracking-wide text-slate-500">No. Rekening</p>
           <div class="mt-1 flex flex-wrap items-center gap-2">
             <span id="accNo" class="font-mono text-lg tracking-wider text-slate-900 select-all">
-              72##&nbsp;2###2&nbsp;1###
+              0087161592
             </span>
             <button type="button"
                     class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-sm bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
