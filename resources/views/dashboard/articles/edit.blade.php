@@ -7,10 +7,7 @@
   use Illuminate\Support\Str;
   use Illuminate\Support\Facades\Route;
 
-  // URL thumbnail yang aman di shared hosting:
-  // 1) kalau sudah http/https atau absolute path → pakai langsung
-  // 2) kalau ada route('articles.thumb') → stream via route
-  // 3) fallback ke asset('storage/...')
+  // ==== Thumbnail URL (aman di shared hosting) ====
   $thumbUrl = null;
   if ($article->thumbnail) {
     if (Str::startsWith($article->thumbnail, ['http://','https://','/'])) {
@@ -18,20 +15,35 @@
     } elseif (Route::has('articles.thumb')) {
       $thumbUrl = route('articles.thumb', $article);
     } else {
-      $thumbUrl = asset('storage/'.$article->thumbnail);
+      // normalisasi ke asset
+      $t = ltrim($article->thumbnail, '/');
+      if (Str::startsWith($t, 'public/')) {
+        $t = 'storage/'.substr($t, 7); // public/... -> storage/...
+      } elseif (!Str::startsWith($t, 'storage/')) {
+        $t = 'storage/'.$t;
+      }
+      $thumbUrl = asset($t);
     }
   }
 
-  // Helper sederhana untuk dok: http/https/absolute → pakai langsung; selain itu → storage
-  $docUrl = function (string $p = null) {
+  // ==== Helper URL dokumentasi (normalisasi path) ====
+  $docUrl = function (?string $p) {
     if (!$p) return null;
-    return Str::startsWith($p, ['http://','https://','/']) ? $p : asset('storage/'.$p);
+    if (Str::startsWith($p, ['http://','https://','/'])) return $p;
+
+    $p = ltrim($p, '/');
+    if (Str::startsWith($p, 'public/')) {
+      $p = 'storage/'.substr($p, 7);          // public/... -> storage/...
+    } elseif (!Str::startsWith($p, 'storage/')) {
+      $p = 'storage/'.$p;                      // relatif -> storage/relatif
+    }
+    return asset($p);
   };
 
   // Ambil array dokumentasi dengan aman
   $docs = is_array($article->documentation)
-            ? $article->documentation
-            : (json_decode($article->documentation ?? '[]', true) ?: []);
+    ? $article->documentation
+    : (json_decode($article->documentation ?? '[]', true) ?: []);
 @endphp
 
 <h1 class="text-2xl font-bold mb-4">Edit Artikel</h1>
@@ -99,8 +111,8 @@
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
         @foreach($docs as $p)
           @php
-            $src = $docUrl($p);
-            $isVideo = Str::endsWith(Str::lower($p), ['.mp4','.mov','.avi','.mkv','.webm']);
+            $src = $docUrl($p); // <- gunakan normalisasi path
+            $isVideo = Str::endsWith(strtolower((string)$p), ['.mp4','.mov','.avi','.mkv','.webm']);
           @endphp
           <label class="border rounded p-2 flex gap-2 items-start bg-gray-50">
             <input type="checkbox" name="keep_existing_docs[]" value="{{ $p }}" checked class="mt-1">
@@ -110,7 +122,7 @@
                   <source src="{{ $src }}">
                 </video>
               @else
-                <img class="w-full h-40 object-cover rounded" src="{{ $src }}" alt="doc">
+                <img class="w-full h-40 object-cover rounded" src="{{ $src }}" alt="doc" loading="lazy" decoding="async">
               @endif
               <div class="text-xs mt-1 break-all">{{ $p }}</div>
             </div>
@@ -122,7 +134,6 @@
 
   <div>
     <label class="block text-sm font-medium">Tambah Documentation (opsional, maks 3 total)</label>
-    {{-- sesuai validasi controller: hanya gambar --}}
     <input type="file" name="documentation[]" multiple class="mt-1 w-full border rounded p-2" accept="image/*">
     @error('documentation.*')<div class="text-red-600 text-sm">{{ $message }}</div>@enderror
     @error('documentation')<div class="text-red-600 text-sm">{{ $message }}</div>@enderror
